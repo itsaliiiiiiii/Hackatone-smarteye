@@ -1,5 +1,6 @@
 import React, { useState, useRef } from 'react';
 import { useTranslation } from 'react-i18next';
+import { useNavigate } from 'react-router-dom';
 import { MapContainer, TileLayer, Marker, useMapEvents } from 'react-leaflet';
 import 'leaflet/dist/leaflet.css';
 import L from 'leaflet';
@@ -24,11 +25,10 @@ const LocationMarker = ({ position, setPosition }) => {
 
 const ReportProblem = () => {
   const { t } = useTranslation();
+  const navigate = useNavigate();
   const fileInputRef = useRef(null);
-  const [mediaFiles, setMediaFiles] = useState([]); // Changed from single image to multiple files
+  const [mediaFiles, setMediaFiles] = useState([]);
   const [position, setPosition] = useState(null);
-  const [isDetecting, setIsDetecting] = useState(false);
-  const [detectedProblem, setDetectedProblem] = useState(null);
   const [formData, setFormData] = useState({
     description: '',
     problemType: ''
@@ -49,9 +49,6 @@ const ReportProblem = () => {
           type: file.type.split('/')[0],
           file: file
         }]);
-        if (file.type.startsWith('image/')) {
-          simulateAIDetection();
-        }
       };
       reader.readAsDataURL(file);
     });
@@ -59,17 +56,6 @@ const ReportProblem = () => {
 
   const removeFile = (index) => {
     setMediaFiles(prev => prev.filter((_, i) => i !== index));
-  };
-
-  const simulateAIDetection = () => {
-    setIsDetecting(true);
-    const problems = ['Pothole', 'Broken Streetlight', 'Garbage', 'Graffiti', 'Broken Sidewalk'];
-    setTimeout(() => {
-      const randomProblem = problems[Math.floor(Math.random() * problems.length)];
-      setDetectedProblem(randomProblem);
-      setFormData(prev => ({ ...prev, problemType: randomProblem }));
-      setIsDetecting(false);
-    }, 2000);
   };
 
   const handleSubmit = (e) => {
@@ -82,6 +68,7 @@ const ReportProblem = () => {
     };
     console.log('Report submitted:', reportData);
     // Here you would typically make an API call to submit the report
+    navigate('/ai-analysis'); // Navigate to AI Analysis page after submission
   };
 
   const getCurrentLocation = () => {
@@ -171,24 +158,7 @@ const ReportProblem = () => {
                   </button>
                 </div>
 
-                {isDetecting && (
-                  <div className="ai-detecting mb-3">
-                    <i className="fas fa-brain me-2"></i>
-                    Detecting problem type...
-                  </div>
-                )}
-
-                {detectedProblem && (
-                  <div className="mb-3">
-                    <label className="form-label">{t('problemType')}</label>
-                    <input
-                      type="text"
-                      className="form-control"
-                      value={formData.problemType}
-                      onChange={(e) => setFormData(prev => ({ ...prev, problemType: e.target.value }))}
-                    />
-                  </div>
-                )}
+                
 
                 <div className="mb-3">
                   <label className="form-label">Description</label>

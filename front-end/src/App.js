@@ -12,6 +12,7 @@ import Home from './pages/frontoffice/Home';
 import Login from './pages/frontoffice/Login';
 import Register from './pages/frontoffice/Register';
 import ReportProblem from './pages/frontoffice/ReportProblem';
+import AIAnalysis from './pages/frontoffice/AIAnalysis';
 
 function App() {
   const { t } = useTranslation();
@@ -33,6 +34,7 @@ function App() {
           <Route path="/login" element={<Login />} />
           <Route path="/register" element={<Register />} />
           <Route path="/report-problem" element={<ReportProblem />} />
+          <Route path="/ai-analysis" element={<AIAnalysis />} />
         </Routes>
       </div>
     </Router>
