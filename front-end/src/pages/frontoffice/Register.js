@@ -8,6 +8,7 @@ const Register = () => {
   const [formData, setFormData] = useState({
     fullName: '',
     phoneNumber: '',
+    password: '',
     cin: '',
     region: '',
     city: ''
@@ -38,6 +39,11 @@ const Register = () => {
       newErrors.phoneNumber = 'Phone number is required';
     } else if (!/^\d{10}$/.test(formData.phoneNumber.trim())) {
       newErrors.phoneNumber = 'Invalid phone number format';
+    }
+    if (!formData.password) {
+      newErrors.password = 'Password is required';
+    } else if (formData.password.length < 6) {
+      newErrors.password = 'Password must be at least 6 characters';
     }
     if (!formData.cin.trim()) {
       newErrors.cin = 'CIN is required';
@@ -95,6 +101,19 @@ const Register = () => {
                     onChange={handleChange}
                   />
                   {errors.phoneNumber && <div className="invalid-feedback">{errors.phoneNumber}</div>}
+                </div>
+
+                <div className="mb-3">
+                  <label htmlFor="password" className="form-label">{t('password')}</label>
+                  <input
+                    type="password"
+                    className={`form-control ${errors.password ? 'is-invalid' : ''}`}
+                    id="password"
+                    name="password"
+                    value={formData.password}
+                    onChange={handleChange}
+                  />
+                  {errors.password && <div className="invalid-feedback">{errors.password}</div>}
                 </div>
 
                 <div className="mb-3">

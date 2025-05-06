@@ -63,7 +63,8 @@ i18n
           problemType: 'Type de Problème',
           date: 'Date',
           status: 'Statut',
-          priority: 'Priorité'
+          priority: 'Priorité',
+          password: 'Mot de passe',
         }
       },
       ar: {
@@ -90,7 +91,8 @@ i18n
           problemType: 'نوع المشكلة',
           date: 'التاريخ',
           status: 'الحالة',
-          priority: 'الأولوية'
+          priority: 'الأولوية',
+          password: 'كلمة المرور',
         }
       }
     }

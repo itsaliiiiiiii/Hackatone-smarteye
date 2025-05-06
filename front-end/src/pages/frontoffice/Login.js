@@ -7,7 +7,7 @@ const Login = () => {
   const navigate = useNavigate();
   const [formData, setFormData] = useState({
     phoneNumber: '',
-    cin: ''
+    password: ''
   });
   const [errors, setErrors] = useState({});
 
@@ -32,8 +32,10 @@ const Login = () => {
     } else if (!/^\d{10}$/.test(formData.phoneNumber.trim())) {
       newErrors.phoneNumber = 'Invalid phone number format';
     }
-    if (!formData.cin.trim()) {
-      newErrors.cin = 'CIN is required';
+    if (!formData.password) {
+      newErrors.password = 'Password is required';
+    } else if (formData.password.length < 6) {
+      newErrors.password = 'Password must be at least 6 characters';
     }
     return newErrors;
   };
@@ -72,16 +74,16 @@ const Login = () => {
                 </div>
 
                 <div className="mb-3">
-                  <label htmlFor="cin" className="form-label">{t('cin')}</label>
+                  <label htmlFor="password" className="form-label">{t('password')}</label>
                   <input
-                    type="text"
-                    className={`form-control ${errors.cin ? 'is-invalid' : ''}`}
-                    id="cin"
-                    name="cin"
-                    value={formData.cin}
+                    type="password"
+                    className={`form-control ${errors.password ? 'is-invalid' : ''}`}
+                    id="password"
+                    name="password"
+                    value={formData.password}
                     onChange={handleChange}
                   />
-                  {errors.cin && <div className="invalid-feedback">{errors.cin}</div>}
+                  {errors.password && <div className="invalid-feedback">{errors.password}</div>}
                 </div>
 
                 <div className="d-grid gap-2">
