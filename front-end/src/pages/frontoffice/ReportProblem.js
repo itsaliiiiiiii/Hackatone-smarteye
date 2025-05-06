@@ -25,7 +25,7 @@ const LocationMarker = ({ position, setPosition }) => {
 const ReportProblem = () => {
   const { t } = useTranslation();
   const fileInputRef = useRef(null);
-  const [image, setImage] = useState(null);
+  const [mediaFiles, setMediaFiles] = useState([]); // Changed from single image to multiple files
   const [position, setPosition] = useState(null);
   const [isDetecting, setIsDetecting] = useState(false);
   const [detectedProblem, setDetectedProblem] = useState(null);
@@ -34,16 +34,31 @@ const ReportProblem = () => {
     problemType: ''
   });
 
-  const handleImageUpload = (e) => {
-    const file = e.target.files[0];
-    if (file) {
+  const handleFileUpload = (e) => {
+    const files = Array.from(e.target.files);
+    const validFiles = files.filter(file => {
+      const type = file.type.split('/')[0];
+      return type === 'image' || type === 'video';
+    });
+
+    validFiles.forEach(file => {
       const reader = new FileReader();
       reader.onloadend = () => {
-        setImage(reader.result);
-        simulateAIDetection();
+        setMediaFiles(prev => [...prev, {
+          url: reader.result,
+          type: file.type.split('/')[0],
+          file: file
+        }]);
+        if (file.type.startsWith('image/')) {
+          simulateAIDetection();
+        }
       };
       reader.readAsDataURL(file);
-    }
+    });
+  };
+
+  const removeFile = (index) => {
+    setMediaFiles(prev => prev.filter((_, i) => i !== index));
   };
 
   const simulateAIDetection = () => {
@@ -61,7 +76,7 @@ const ReportProblem = () => {
     e.preventDefault();
     const reportData = {
       ...formData,
-      image,
+      mediaFiles,
       location: position,
       date: new Date().toISOString(),
     };
@@ -70,7 +85,7 @@ const ReportProblem = () => {
   };
 
   const getCurrentLocation = () => {
-    if (navigator.geolocation) {
+    if ("geolocation" in navigator) {
       navigator.geolocation.getCurrentPosition(
         (position) => {
           setPosition({
@@ -79,9 +94,11 @@ const ReportProblem = () => {
           });
         },
         (error) => {
-          console.error('Error getting location:', error);
+          console.error("Error getting location:", error);
         }
       );
+    } else {
+      console.error("Geolocation is not supported by this browser.");
     }
   };
 
@@ -95,40 +112,62 @@ const ReportProblem = () => {
               
               <form onSubmit={handleSubmit}>
                 <div className="mb-4">
-                  <div className="d-flex justify-content-center mb-3">
-                    {image ? (
-                      <img
-                        src={image}
-                        alt="Problem"
-                        className="img-fluid rounded"
-                        style={{ maxHeight: '300px' }}
-                      />
-                    ) : (
+                  <div className="d-flex flex-wrap gap-3 mb-3">
+                    {mediaFiles.map((media, index) => (
+                      <div key={index} className="position-relative" style={{ width: '200px' }}>
+                        {media.type === 'image' ? (
+                          <img
+                            src={media.url}
+                            alt={`Upload ${index + 1}`}
+                            className="img-fluid rounded"
+                          />
+                        ) : (
+                          <video
+                            src={media.url}
+                            className="img-fluid rounded"
+                            controls
+                            style={{ maxHeight: '200px' }}
+                          />
+                        )}
+                        <button
+                          type="button"
+                          className="btn btn-danger btn-sm position-absolute top-0 end-0 m-1"
+                          onClick={() => removeFile(index)}
+                        >
+                          <i className="fas fa-times"></i>
+                        </button>
+                      </div>
+                    ))}
+                    
+                    {mediaFiles.length === 0 && (
                       <div
                         className="border rounded d-flex align-items-center justify-content-center"
-                        style={{ height: '300px', width: '100%', cursor: 'pointer' }}
+                        style={{ height: '200px', width: '200px', cursor: 'pointer' }}
                         onClick={() => fileInputRef.current.click()}
                       >
                         <div className="text-center">
-                          <i className="fas fa-camera fa-3x mb-3"></i>
-                          <p>{t('uploadImage')}</p>
+                          <i className="fas fa-upload fa-2x mb-2"></i>
+                          <p className="mb-0">{t('uploadMedia')}</p>
                         </div>
                       </div>
                     )}
                   </div>
+                  
                   <input
                     type="file"
                     ref={fileInputRef}
                     className="d-none"
-                    accept="image/*"
-                    onChange={handleImageUpload}
+                    accept="image/*,video/*"
+                    onChange={handleFileUpload}
+                    multiple
                   />
+                  
                   <button
                     type="button"
                     className="btn btn-outline-primary w-100"
                     onClick={() => fileInputRef.current.click()}
                   >
-                    {image ? t('uploadImage') : t('takePhoto')}
+                    {t('uploadMedia')}
                   </button>
                 </div>
 
@@ -191,7 +230,7 @@ const ReportProblem = () => {
                   <button
                     type="submit"
                     className="btn btn-primary btn-lg"
-                    disabled={!image || !position || !formData.problemType}
+                    disabled={mediaFiles.length === 0 || !position || !formData.problemType}
                   >
                     {t('submit')}
                   </button>
