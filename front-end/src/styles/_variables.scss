@@ -1,40 +1,68 @@
 // Theme Colors
-$primary: #007bff;
-$secondary: #6c757d;
-$success: #28a745;
-$info: #17a2b8;
-$warning: #ffc107;
-$danger: #dc3545;
-$light: #f8f9fa;
-$dark: #343a40;
+$primary: #4f46e5;
+$secondary: #64748b;
+$success: #22c55e;
+$info: #0ea5e9;
+$warning: #f59e0b;
+$danger: #ef4444;
+$light: #f8fafc;
+$dark: #1e293b;
 
 // Custom Colors
-$urban-blue: #1e88e5;
-$urban-green: #43a047;
-$urban-red: #e53935;
-$urban-yellow: #fdd835;
-$urban-gray: #607d8b;
+$urban-blue: #3b82f6;
+$urban-green: #10b981;
+$urban-red: #f43f5e;
+$urban-yellow: #eab308;
+$urban-gray: #64748b;
+$urban-purple: #8b5cf6;
+$urban-indigo: #6366f1;
+
+// Gradients
+$gradient-primary: linear-gradient(135deg, $urban-blue, $urban-purple);
+$gradient-success: linear-gradient(135deg, $urban-green, $urban-blue);
+$gradient-danger: linear-gradient(135deg, $urban-red, $urban-purple);
 
 // Font Sizes
 $font-size-base: 1rem;
 $font-size-lg: 1.25rem;
 $font-size-sm: 0.875rem;
+$font-size-xs: 0.75rem;
+
+// Font Weights
+$font-weight-normal: 400;
+$font-weight-medium: 500;
+$font-weight-semibold: 600;
+$font-weight-bold: 700;
 
 // Spacing
 $spacing-unit: 8px;
-$container-padding: $spacing-unit * 2;
+$container-padding: $spacing-unit * 3;
 
 // Border Radius
-$border-radius: 4px;
-$border-radius-lg: 8px;
+$border-radius: 8px;
+$border-radius-lg: 12px;
+$border-radius-xl: 16px;
+$border-radius-2xl: 20px;
+
+// Shadows
+$shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+$shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px -1px rgba(0, 0, 0, 0.1);
+$shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -2px rgba(0, 0, 0, 0.1);
+$shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -4px rgba(0, 0, 0, 0.1);
 
 // Breakpoints
-$breakpoint-sm: 576px;
+$breakpoint-sm: 640px;
 $breakpoint-md: 768px;
-$breakpoint-lg: 992px;
-$breakpoint-xl: 1200px;
+$breakpoint-lg: 1024px;
+$breakpoint-xl: 1280px;
+$breakpoint-2xl: 1536px;
 
 // Z-index
 $z-index-dropdown: 1000;
 $z-index-modal: 1050;
 $z-index-tooltip: 1070;
+
+// Transitions
+$transition-base: all 0.2s ease-in-out;
+$transition-smooth: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+$transition-bounce: all 0.5s cubic-bezier(0.68, -0.55, 0.265, 1.55);
