@@ -461,22 +461,7 @@ const ReportProblem = () => {
                   </div>
                 </div>
 
-                <div className="mb-3">
-                  <label className="form-label">Problem Type</label>
-                  <select
-                    className="form-select"
-                    value={formData.problemType}
-                    onChange={(e) => setFormData(prev => ({ ...prev, problemType: e.target.value }))}
-                    required
-                  >
-                    <option value="">Select a problem type</option>
-                    {problemTypes.map((type, index) => (
-                      <option key={index} value={type}>
-                        {type}
-                      </option>
-                    ))}
-                  </select>
-                </div>
+                
 
                 <div className="mb-3">
                   <label className="form-label">Description</label>
