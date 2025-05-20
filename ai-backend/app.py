@@ -1,10 +1,11 @@
-from flask import Flask,request,jsonify
+from flask import Flask, request, jsonify
+from flask_cors import CORS
+import numpy as np
 import cv2
-import numpy as np 
-from flask_cors import CORS 
-from app.Services.DL import detect_and_classify,detect_and_classify2
-app=Flask(__name__)
-CORS(app)
+from app.Services.DL import detect_and_classify, detect_and_classify2
+
+app = Flask(__name__)
+CORS(app, resources={r"/*": {"origins": ["http://localhost:3000", "http://localhost:5173", "http://localhost:3001"], "supports_credentials": True, "allow_headers": ["Content-Type", "Authorization", "Content-Length", "X-Requested-With"], "methods": ["GET", "POST", "PUT", "DELETE", "OPTIONS"]}})
 
 # === Endpoint Flask ===
 @app.route('/predict', methods=['POST'])

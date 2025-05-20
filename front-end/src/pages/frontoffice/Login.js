@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useNavigate, Link } from 'react-router-dom';
+import { login } from '../../services/api';
 
 const Login = () => {
   const { t } = useTranslation();
@@ -10,6 +11,7 @@ const Login = () => {
     password: ''
   });
   const [errors, setErrors] = useState({});
+  const [isLoading, setIsLoading] = useState(false);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -40,13 +42,27 @@ const Login = () => {
     return newErrors;
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
     const newErrors = validateForm();
     if (Object.keys(newErrors).length === 0) {
-      // Here you would typically make an API call to authenticate the user
-      console.log('Login attempt:', formData);
-      navigate('/dashboard');
+      setIsLoading(true);
+      try {
+        const response = await login(formData.phoneNumber, formData.password);
+        if (!response.user || !response.token) {
+          throw new Error('Invalid response from server');
+        }
+        // Store user data and token in localStorage
+        localStorage.setItem('user', JSON.stringify(response.user));
+        localStorage.setItem('token', response.token);
+        navigate('/');
+      } catch (error) {
+        setErrors({
+          submit: error.message || 'Login failed. Please check your credentials.'
+        });
+      } finally {
+        setIsLoading(false);
+      }
     } else {
       setErrors(newErrors);
     }
@@ -59,6 +75,11 @@ const Login = () => {
           <div className="card shadow-sm">
             <div className="card-body p-4">
               <h2 className="text-center mb-4">{t('login')}</h2>
+              {errors.submit && (
+                <div className="alert alert-danger" role="alert">
+                  {errors.submit}
+                </div>
+              )}
               <form onSubmit={handleSubmit}>
                 <div className="mb-3">
                   <label htmlFor="phoneNumber" className="form-label">{t('phoneNumber')}</label>
@@ -69,6 +90,7 @@ const Login = () => {
                     name="phoneNumber"
                     value={formData.phoneNumber}
                     onChange={handleChange}
+                    disabled={isLoading}
                   />
                   {errors.phoneNumber && <div className="invalid-feedback">{errors.phoneNumber}</div>}
                 </div>
@@ -82,13 +104,21 @@ const Login = () => {
                     name="password"
                     value={formData.password}
                     onChange={handleChange}
+                    disabled={isLoading}
                   />
                   {errors.password && <div className="invalid-feedback">{errors.password}</div>}
                 </div>
 
                 <div className="d-grid gap-2">
-                  <button type="submit" className="btn btn-primary">
-                    {t('login')}
+                  <button type="submit" className="btn btn-primary" disabled={isLoading}>
+                    {isLoading ? (
+                      <>
+                        <span className="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>
+                        Loading...
+                      </>
+                    ) : (
+                      t('login')
+                    )}
                   </button>
                 </div>
 

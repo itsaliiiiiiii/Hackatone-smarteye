@@ -1,10 +1,10 @@
-import React, { useState, useRef } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useNavigate } from 'react-router-dom';
 import { MapContainer, TileLayer, Marker, useMapEvents } from 'react-leaflet';
+import { createReport } from '../../services/api';
 import 'leaflet/dist/leaflet.css';
 import L from 'leaflet';
-
 // Fix for default marker icon in leaflet
 delete L.Icon.Default.prototype._getIconUrl;
 L.Icon.Default.mergeOptions({
@@ -12,17 +12,14 @@ L.Icon.Default.mergeOptions({
   iconUrl: require('leaflet/dist/images/marker-icon.png'),
   shadowUrl: require('leaflet/dist/images/marker-shadow.png'),
 });
-
 const LocationMarker = ({ position, setPosition }) => {
   useMapEvents({
     click(e) {
       setPosition(e.latlng);
     },
   });
-
   return position ? <Marker position={position} /> : null;
 };
-
 const ReportProblem = () => {
   const { t } = useTranslation();
   const navigate = useNavigate();
@@ -30,75 +27,51 @@ const ReportProblem = () => {
   const [mediaFiles, setMediaFiles] = useState([]);
   const [position, setPosition] = useState(null);
   const [formData, setFormData] = useState({
-    description: '',
-    problemType: ''
+    description: ''
   });
   const [isLoadingLocation, setIsLoadingLocation] = useState(false);
   const [locationError, setLocationError] = useState('');
   const [isDragging, setIsDragging] = useState(false);
-
-  // Problem types for the dropdown
-  const problemTypes = [
-    'Road Damage',
-    'Flooding',
-    'Electrical Issue',
-    'Water Supply Problem',
-    'Waste Disposal',
-    'Public Safety',
-    'Others'
-  ];
-
+  const [submitError, setSubmitError] = useState('');
+  const [isSubmitting, setIsSubmitting] = useState(false);
   const handleDragEnter = (e) => {
     e.preventDefault();
     e.stopPropagation();
     setIsDragging(true);
   };
-
   const handleDragLeave = (e) => {
     e.preventDefault();
     e.stopPropagation();
     setIsDragging(false);
   };
-
   const handleDragOver = (e) => {
     e.preventDefault();
     e.stopPropagation();
   };
-
   const handleDrop = (e) => {
     e.preventDefault();
     e.stopPropagation();
     setIsDragging(false);
-
     const files = Array.from(e.dataTransfer.files);
     handleFiles(files);
   };
-
   const handleFiles = (files) => {
     const validFiles = files.filter(file => {
       const type = file.type.split('/')[0];
       return type === 'image' || type === 'video';
     });
-
     if (validFiles.length === 0) {
-      // Show alert if no valid files were selected
       alert('Please select only image or video files.');
       return;
     }
-
-    // Show loading indicator for large files
-    if (validFiles.some(file => file.size > 5000000)) { // 5MB threshold
-      // For simplicity we'll just show a console message, but you could add a UI indicator
+    if (validFiles.some(file => file.size > 5000000)) {
       console.log('Processing large files, please wait...');
     }
-
     validFiles.forEach(file => {
-      // Check file size - limit to 20MB for example
-      if (file.size > 20000000) { // 20MB
+      if (file.size > 20000000) {
         alert(`File ${file.name} exceeds the 20MB size limit.`);
         return;
       }
-
       const reader = new FileReader();
       reader.onloadend = () => {
         setMediaFiles(prev => [...prev, {
@@ -106,7 +79,7 @@ const ReportProblem = () => {
           type: file.type.split('/')[0],
           file: file,
           name: file.name,
-          size: (file.size / 1024 / 1024).toFixed(2) + ' MB', // Format size in MB
+          size: (file.size / 1024 / 1024).toFixed(2) + ' MB', // Fixed missing parenthesis
           timestamp: new Date().getTime()
         }]);
       };
@@ -128,17 +101,74 @@ const ReportProblem = () => {
     setMediaFiles(prev => prev.filter((_, i) => i !== index));
   };
 
-  const handleSubmit = (e) => {
-    e.preventDefault();
-    const reportData = {
-      ...formData,
-      mediaFiles,
-      location: position,
-      date: new Date().toISOString(),
+  // Add this useEffect at the start of the component
+  useEffect(() => {
+    const checkAuth = () => {
+      const token = localStorage.getItem('token');
+      const user = localStorage.getItem('user');
+      if (!token || !user) {
+        navigate('/login');
+      }
     };
-    console.log('Report submitted:', reportData);
-    // Here you would typically make an API call to submit the report
-    navigate('/ai-analysis'); // Navigate to AI Analysis page after submission
+    checkAuth();
+  }, [navigate]);
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    setSubmitError('');
+    setIsSubmitting(true);
+  
+    try {
+      // Verify we have required data
+      if (!position) {
+        throw new Error('Please select a location on the map');
+      }
+      if (mediaFiles.length === 0) {
+        throw new Error('Please upload at least one image');
+      }
+  
+      const reportData = {
+        images: mediaFiles,
+        location: position,
+        description: formData.description
+      };
+  
+      const response = await createReport(reportData);
+  
+      // Debugging: Log the response to inspect its structure
+      console.log('Response from server:', response);
+  
+      // Check if response and reportId are defined
+      if (!response || !response.success) {
+        throw new Error('Invalid response from server');
+      }
+  
+      // Log data before navigation
+      console.log('Navigating with data:', {
+        reportId: response.reportId,
+        aiResults: response.aiAnalysis,
+        annotatedImage: response.image_annotated
+      });
+  
+      // Navigate with AI results and annotated image from the backend response
+      navigate('/ai-analysis', { 
+        state: { 
+          reportId: response.reportId,
+          location: position,
+          aiResults: response.aiAnalysis, // Ensure this matches the backend response
+          annotatedImage: response.image_annotated // Ensure this matches the backend response
+        } 
+      });
+  
+    } catch (error) {
+      console.error('Report submission error:', error);
+      setSubmitError(error.message);
+      if (error.response?.data?.error) {
+        setSubmitError(error.response.data.error);
+      }
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   const getCurrentLocation = () => {
@@ -204,13 +234,23 @@ const ReportProblem = () => {
   };
 
   const isFormValid = () => {
-    return mediaFiles.length > 0 && !!position && !!formData.problemType && !!formData.description.trim();
+    return (
+      mediaFiles.length > 0 && 
+      position !== null && 
+      formData.description.trim() !== ''
+    );
   };
 
   return (
     <div className="container py-5">
       <div className="row justify-content-center">
         <div className="col-md-8">
+          {submitError && (
+            <div className="alert alert-danger alert-dismissible fade show" role="alert">
+              {submitError}
+              <button type="button" className="btn-close" onClick={() => setSubmitError('')} aria-label="Close"></button>
+            </div>
+          )}
           <div className="card shadow-sm">
             <div className="card-body p-4">
               <h2 className="text-center mb-4">{t('reportProblem')}</h2>
@@ -523,6 +563,13 @@ const ReportProblem = () => {
                     type="submit"
                     className="btn btn-primary btn-lg"
                     disabled={!isFormValid()}
+                    onClick={() => {
+                      console.log('Validation state:', {
+                        hasMedia: mediaFiles.length > 0,
+                        hasPosition: position !== null,
+                        hasDescription: formData.description.trim() !== ''
+                      });
+                    }}
                   >
                     {t('submit')}
                   </button>

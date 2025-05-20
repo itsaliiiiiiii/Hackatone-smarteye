@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useNavigate } from 'react-router-dom';
+import { register } from '../../services/api';
 
 const Register = () => {
   const { t } = useTranslation();
@@ -14,6 +15,7 @@ const Register = () => {
     city: ''
   });
   const [errors, setErrors] = useState({});
+  const [isLoading, setIsLoading] = useState(false);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -57,13 +59,21 @@ const Register = () => {
     return newErrors;
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
     const newErrors = validateForm();
     if (Object.keys(newErrors).length === 0) {
-      // Here you would typically make an API call to register the user
-      console.log('Form submitted:', formData);
-      navigate('/login');
+      setIsLoading(true);
+      try {
+        await register(formData);
+        navigate('/login');
+      } catch (error) {
+        setErrors({
+          submit: error.error || 'Registration failed. Please try again.'
+        });
+      } finally {
+        setIsLoading(false);
+      }
     } else {
       setErrors(newErrors);
     }
@@ -76,6 +86,11 @@ const Register = () => {
           <div className="card shadow-sm">
             <div className="card-body p-4">
               <h2 className="text-center mb-4">{t('register')}</h2>
+              {errors.submit && (
+                <div className="alert alert-danger" role="alert">
+                  {errors.submit}
+                </div>
+              )}
               <form onSubmit={handleSubmit}>
                 <div className="mb-3">
                   <label htmlFor="fullName" className="form-label">{t('fullName')}</label>
@@ -86,6 +101,7 @@ const Register = () => {
                     name="fullName"
                     value={formData.fullName}
                     onChange={handleChange}
+                    disabled={isLoading}
                   />
                   {errors.fullName && <div className="invalid-feedback">{errors.fullName}</div>}
                 </div>
@@ -99,6 +115,7 @@ const Register = () => {
                     name="phoneNumber"
                     value={formData.phoneNumber}
                     onChange={handleChange}
+                    disabled={isLoading}
                   />
                   {errors.phoneNumber && <div className="invalid-feedback">{errors.phoneNumber}</div>}
                 </div>
@@ -112,6 +129,7 @@ const Register = () => {
                     name="password"
                     value={formData.password}
                     onChange={handleChange}
+                    disabled={isLoading}
                   />
                   {errors.password && <div className="invalid-feedback">{errors.password}</div>}
                 </div>
@@ -125,6 +143,7 @@ const Register = () => {
                     name="cin"
                     value={formData.cin}
                     onChange={handleChange}
+                    disabled={isLoading}
                   />
                   {errors.cin && <div className="invalid-feedback">{errors.cin}</div>}
                 </div>
@@ -138,6 +157,7 @@ const Register = () => {
                     name="region"
                     value={formData.region}
                     onChange={handleChange}
+                    disabled={isLoading}
                   />
                   {errors.region && <div className="invalid-feedback">{errors.region}</div>}
                 </div>
@@ -151,13 +171,21 @@ const Register = () => {
                     name="city"
                     value={formData.city}
                     onChange={handleChange}
+                    disabled={isLoading}
                   />
                   {errors.city && <div className="invalid-feedback">{errors.city}</div>}
                 </div>
 
                 <div className="d-grid gap-2">
-                  <button type="submit" className="btn btn-primary">
-                    {t('register')}
+                  <button type="submit" className="btn btn-primary" disabled={isLoading}>
+                    {isLoading ? (
+                      <>
+                        <span className="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>
+                        Loading...
+                      </>
+                    ) : (
+                      t('register')
+                    )}
                   </button>
                 </div>
               </form>

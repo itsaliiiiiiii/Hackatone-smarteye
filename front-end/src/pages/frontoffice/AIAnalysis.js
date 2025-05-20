@@ -1,43 +1,35 @@
-import React, { useState, useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
+import { useLocation } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { MapContainer, TileLayer, Marker } from 'react-leaflet';
 
 const AIAnalysis = () => {
   const { t } = useTranslation();
+  const location = useLocation();
   const [analysis, setAnalysis] = useState(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    // Simulate AI analysis
-    const simulateAnalysis = () => {
-      setTimeout(() => {
-        setAnalysis({
-          problemType: 'Pothole',
-          severity: 'High',
-          location: {
-            lat: 31.7917,
-            lng: -7.0926
-          },
-          responsibleAgency: 'Municipal Road Maintenance',
-          estimatedTimeToFix: '48 hours',
-          similarCases: 5,
-          recommendations: [
-            'Temporary road barriers needed',
-            'Traffic redirection recommended',
-            'Immediate attention required'
-          ],
-          impactLevel: 'Medium',
-          affectedArea: '2 square meters',
-          priority: 'High'
-        });
-        setLoading(false);
-      }, 2000);
-    };
+    console.log("Location state:", location.state); // Log the location state to verify its contents
 
-    simulateAnalysis();
-  }, []);
-
-  if (loading) {
+    if (location.state?.aiResults) {
+      const predictions = location.state.aiResults[0]?.[0] || {}; // Safely access predictions
+      setAnalysis({
+        problemType: predictions.class || 'Unknown', // Provide default values
+        severity: predictions.severity || 'N/A', // Provide default values
+        priority: predictions.priority || 'N/A', // Provide default values
+        responsibleAgency: predictions.agency || 'N/A', // Provide default values
+        estimatedTimeToFix: predictions.estimatedTime || 'N/A', // Provide default values
+        similarCases: predictions.similarCases || 'N/A', // Provide default values
+        annotatedImage: location.state.annotatedImage, // Ensure this field is used
+        location: location.state.location,
+        recommendations: predictions.recommendations || []
+      });
+      console.log("Annotated Image Base64:", location.state.annotatedImage); // Log the base64 string
+      setLoading(false);
+    }
+  }, [location]);
+  if (loading || !analysis) {
     return (
       <div className="container py-5 text-center">
         <div className="spinner-border text-primary" role="status">
@@ -55,7 +47,6 @@ const AIAnalysis = () => {
           <div className="card shadow-sm">
             <div className="card-body">
               <h2 className="text-center mb-4">AI Analysis Results</h2>
-
               <div className="row mb-4">
                 <div className="col-md-6">
                   <h5>Problem Details</h5>
@@ -92,36 +83,50 @@ const AIAnalysis = () => {
                   </ul>
                 </div>
               </div>
-
               <div className="mb-4">
-                <h5>Location</h5>
-                <div className="border rounded overflow-hidden">
-                  <MapContainer
-                    center={[analysis.location.lat, analysis.location.lng]}
-                    zoom={13}
-                    style={{ height: '300px' }}
-                  >
-                    <TileLayer
-                      url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
-                      attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+                <h5>Annotated Image Analysis</h5>
+                <div className="border rounded overflow-hidden text-center">
+                  {analysis.annotatedImage && (
+                    <img
+                      src={`data:image/png;base64,${analysis.annotatedImage}`}
+                      alt="AI Analysis Result"
+                      className="img-fluid"
+                      style={{ maxHeight: '400px' }}
                     />
-                    <Marker position={[analysis.location.lat, analysis.location.lng]} />
-                  </MapContainer>
+                  )}
                 </div>
               </div>
-
-              <div className="mb-4">
-                <h5>Recommendations</h5>
-                <ul className="list-group">
-                  {analysis.recommendations.map((rec, index) => (
-                    <li key={index} className="list-group-item">
-                      <i className="fas fa-check-circle text-success me-2"></i>
-                      {rec}
-                    </li>
-                  ))}
-                </ul>
-              </div>
-
+              {analysis.location && (
+                <div className="mb-4">
+                  <h5>Location</h5>
+                  <div className="border rounded overflow-hidden">
+                    <MapContainer
+                      center={[analysis.location.lat, analysis.location.lng]}
+                      zoom={13}
+                      style={{ height: '300px' }}
+                    >
+                      <TileLayer
+                        url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+                        attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+                      />
+                      <Marker position={[analysis.location.lat, analysis.location.lng]} />
+                    </MapContainer>
+                  </div>
+                </div>
+              )}
+              {analysis.recommendations && analysis.recommendations.length > 0 && (
+                <div className="mb-4">
+                  <h5>Recommendations</h5>
+                  <ul className="list-group">
+                    {analysis.recommendations.map((rec, index) => (
+                      <li key={index} className="list-group-item">
+                        <i className="fas fa-check-circle text-success me-2"></i>
+                        {rec}
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              )}
               <div className="d-grid gap-2">
                 <button className="btn btn-primary">
                   Track Progress
