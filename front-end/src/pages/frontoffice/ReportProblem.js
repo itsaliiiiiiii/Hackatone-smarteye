@@ -256,7 +256,7 @@ const ReportProblem = () => {
                   <ul className="list-group">
                     {responseData.prediction.map((pred, index) => (
                       <li key={index} className="list-group-item">
-                        {typeof pred === 'object' ? JSON.stringify(pred) : pred}
+                        {typeof pred === 'object' ? JSON.stringify(pred.class.replace(/^"(.*)"$/, '$1')) : pred}
                       </li>
                     ))}
                   </ul>
@@ -267,10 +267,10 @@ const ReportProblem = () => {
         </div>
 
         <div className="row">
-          <div className="col-md-6 mb-4">
+          <div className=" mb-4">
             <div className="card h-100">
               <div className="card-header bg-primary text-white">
-                Original Image
+                Annotated Image
               </div>
               <div className="card-body text-center">
                 {responseData.image && (
@@ -288,31 +288,7 @@ const ReportProblem = () => {
             </div>
           </div>
 
-          <div className="col-md-6 mb-4">
-            <div className="card h-100">
-              <div className="card-header bg-primary text-white">
-                Annotated Image
-              </div>
-              <div className="card-body text-center">
-                {responseData.image_annoter_path && (
-                  <img
-                    src={`/${responseData.image_annoter_path}`}
-                    alt="Annotated Image"
-                    className="img-fluid rounded"
-                    style={{ maxHeight: '300px' }}
-                    onError={(e) => {
-                      console.error("Error loading annotated image");
-                      e.target.src = "/images/placeholder-image.png"; // Fallback image
-                      e.target.alt = "Image could not be loaded";
-                    }}
-                  />
-                )}
-                <p className="text-muted mt-2">
-                  Path: {responseData.image_annoter_path || 'Not available'}
-                </p>
-              </div>
-            </div>
-          </div>
+          
         </div>
 
         <div className="d-flex justify-content-between mt-3">
