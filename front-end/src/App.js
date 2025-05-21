@@ -34,6 +34,10 @@ function App() {
     window.location.href = '/';
   };
 
+  const handleLogin = () => {
+    setIsAuthenticated(true);
+  };
+
   return (
     <Router>
       <div className="app-container">
@@ -87,7 +91,7 @@ function App() {
         <Routes>
           {/* Frontoffice Routes */}
           <Route path="/" element={<Home />} />
-          <Route path="/login" element={<Login />} />
+          <Route path="/login" element={<Login onLogin={handleLogin} />} />
           <Route path="/register" element={<Register />} />
           <Route path="/report-problem" element={<ReportProblem />} />
           <Route path="/ai-analysis" element={<AIAnalysis />} />
