@@ -9,9 +9,17 @@ import os
 UPLOAD_FOLDER = 'uploads'  # dossier où stocker les images
 os.makedirs(UPLOAD_FOLDER, exist_ok=True)  # créer s'il n'existe pas
 
-def save_image_file(image_bytes, filename):
-    path = os.path.join(UPLOAD_FOLDER, filename)
-    with open(path, 'wb') as f:
+import base64
+
+def save_image_file(image_data, filename):
+    # Si image_data est une chaîne, on suppose base64 => on décode en bytes
+    if isinstance(image_data, str):
+        image_bytes = base64.b64decode(image_data)
+    else:
+        image_bytes = image_data
+
+    path = f"uploads/{filename}"
+    with open(path, "wb") as f:
         f.write(image_bytes)
     return path
 
@@ -43,7 +51,7 @@ def get_city_from_coordinates(lat, lon):
 
 
 
-def get_Result(img, desc, x, y, i_bytes):
+def get_Result(id_user,img, desc, x, y, i_bytes):
     ville = get_city_from_coordinates(x, y)
     print(ville)
 
@@ -62,7 +70,7 @@ def get_Result(img, desc, x, y, i_bytes):
         problemType=predictions[0]['class'],
         status='pending',
         priority='high',
-        UserId=1,
+        UserId=id_user,
         CityId=city.id,
         AgencyId=agence.id
     )
@@ -91,6 +99,6 @@ def get_Result(img, desc, x, y, i_bytes):
         "image": img_base64,
         "prediction": predictions,
         "agence": agence.name,
-        "image_path": saved_image_path1,
+        "image_path": saved_image_path2,
         "image_annoter_path": saved_image_path2
     })

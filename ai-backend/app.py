@@ -95,6 +95,9 @@ def say_Hellow():
 
 @app.route('/reports', methods=['POST'])
 def create_report():
+
+    id_user=request.args.get('id_user')
+
     description = request.form.get('problemType')
 
     if 'image' not in request.files:
@@ -114,7 +117,7 @@ def create_report():
     x = location_dict['x']
     y = location_dict['y']
 
-    result = get_Result(image, description, x, y, image_initial64)
+    result = get_Result(id_user,image, description, x, y, image_initial64)
 
     return result
 
