@@ -10,6 +10,4 @@ class User(db.Model):
     password = db.Column(db.String(255), nullable=False)
     
     CityId = db.Column(db.Integer, db.ForeignKey('Cities.id'), nullable=True)
-    createdAt = db.Column(db.DateTime, default=datetime.utcnow)
-    updatedAt = db.Column(db.DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
     reports = db.relationship('Report', backref='user', lazy=True)
