@@ -3,7 +3,7 @@ import { useTranslation } from 'react-i18next';
 import { useNavigate, Link } from 'react-router-dom';
 import { login } from '../../services/api';
 
-const Login = () => {
+const Login = ({ onLogin }) => {
   const { t } = useTranslation();
   const navigate = useNavigate();
   const [formData, setFormData] = useState({
@@ -55,6 +55,10 @@ const Login = () => {
         // Store user data and token in localStorage
         localStorage.setItem('user', JSON.stringify(response.user));
         localStorage.setItem('token', response.token);
+        // Call the onLogin prop to update authentication state in App.js
+        if (onLogin) {
+          onLogin();
+        }
         navigate('/');
       } catch (error) {
         setErrors({
