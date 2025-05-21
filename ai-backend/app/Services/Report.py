@@ -102,3 +102,4 @@ def get_Result(id_user,img, desc, x, y, i_bytes):
         "image_path": saved_image_path2,
         "image_annoter_path": saved_image_path2
     })
+
