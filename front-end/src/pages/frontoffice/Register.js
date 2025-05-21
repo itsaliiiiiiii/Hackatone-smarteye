@@ -11,7 +11,6 @@ const Register = () => {
     phoneNumber: '',
     password: '',
     cin: '',
-    region: '',
     city: ''
   });
   const [errors, setErrors] = useState({});
@@ -50,9 +49,7 @@ const Register = () => {
     if (!formData.cin.trim()) {
       newErrors.cin = 'CIN is required';
     }
-    if (!formData.region.trim()) {
-      newErrors.region = 'Region is required';
-    }
+
     if (!formData.city.trim()) {
       newErrors.city = 'City is required';
     }
@@ -148,19 +145,7 @@ const Register = () => {
                   {errors.cin && <div className="invalid-feedback">{errors.cin}</div>}
                 </div>
 
-                <div className="mb-3">
-                  <label htmlFor="region" className="form-label">{t('region')}</label>
-                  <input
-                    type="text"
-                    className={`form-control ${errors.region ? 'is-invalid' : ''}`}
-                    id="region"
-                    name="region"
-                    value={formData.region}
-                    onChange={handleChange}
-                    disabled={isLoading}
-                  />
-                  {errors.region && <div className="invalid-feedback">{errors.region}</div>}
-                </div>
+
 
                 <div className="mb-3">
                   <label htmlFor="city" className="form-label">{t('city')}</label>
