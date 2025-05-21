@@ -49,18 +49,15 @@ const Login = ({ onLogin }) => {
       setIsLoading(true);
       try {
         const response = await login(formData.phoneNumber, formData.password);
-        if (!response.user || !response.token) {
-          throw new Error('Invalid response from server');
-        }
-        // Store user data and token in localStorage
-        localStorage.setItem('user', JSON.stringify(response.user));
-        localStorage.setItem('token', response.token);
+        
         // Call the onLogin prop to update authentication state in App.js
         if (onLogin) {
           onLogin();
         }
+        
         navigate('/');
       } catch (error) {
+        
         setErrors({
           submit: error.message || 'Login failed. Please check your credentials.'
         });

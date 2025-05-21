@@ -103,14 +103,7 @@ const ReportProblem = () => {
 
   // Add this useEffect at the start of the component
   useEffect(() => {
-    const checkAuth = () => {
-      const token = localStorage.getItem('token');
-      const user = localStorage.getItem('user');
-      if (!token || !user) {
-        navigate('/login');
-      }
-    };
-    checkAuth();
+    
   }, [navigate]);
 
   const handleSubmit = async (e) => {
@@ -138,10 +131,10 @@ const ReportProblem = () => {
       // Debugging: Log the response to inspect its structure
       console.log('Response from server:', response);
   
-      // Check if response and reportId are defined
+      /* // Check if response and reportId are defined
       if (!response || !response.success) {
         throw new Error('Invalid response from server');
-      }
+      } */
   
       // Log data before navigation
       console.log('Navigating with data:', {

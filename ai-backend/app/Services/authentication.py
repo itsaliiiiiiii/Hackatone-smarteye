@@ -14,11 +14,6 @@ def register_user(fullName, phoneNumber, password, cin, city_name):
         return {'error': f'City "{city_name}" not found in region'}, 400
 
 
-
-    
-    
-   
-
     # Hasher le mot de passe
     hashed_password = generate_password_hash(password)
 

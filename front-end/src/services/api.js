@@ -58,13 +58,13 @@ export const createReport = async (reportData) => {
     });
     
     // Ensure the response includes the base64 image data
-    if (response.data.image_annotated) {
-      response.data.image_annotated = `data:image/jpeg;base64,${response.data.image_annotated}`;
+    if (response.data.image) {
+      response.data.image = `data:image/jpeg;base64,${response.data.image}`;
     }
     return {
       ...response.data,
-      cityName: response.data.cityName,
-      agencyName: response.data.agencyName
+      cityName: response.data.agence,
+      agencyName: response.data.agence
     };
   } catch (error) {
     throw new Error(error.response?.data?.error || 'Report creation failed');
