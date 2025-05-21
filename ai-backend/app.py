@@ -95,30 +95,29 @@ def say_Hellow():
 
 @app.route('/reports', methods=['POST'])
 def create_report():
-    # Récupérer les champs texte depuis form-data
     description = request.form.get('problemType')
+
     if 'image' not in request.files:
         return jsonify({"error": "No image provided"}), 400
 
     file = request.files['image']
     img_bytes = np.frombuffer(file.read(), np.uint8)
+
+    # Décodage de l'image
     image = cv2.imdecode(img_bytes, cv2.IMREAD_COLOR)
 
+    # Reprend les bytes d'origine (déjà lus ci-dessus)
+    image_initial64 = base64.b64encode(img_bytes).decode('utf-8')
+
     location_raw = request.form.get('location')
-    location_dict = json.loads(location_raw)  # transforme la chaîne JSON en dict
+    location_dict = json.loads(location_raw)
+    x = location_dict['x']
+    y = location_dict['y']
 
-    x = int(location_dict['x'])
-    y = int(location_dict['y'])
+    result = get_Result(image, description, x, y, image_initial64)
 
-    # Lire le contenu binaire de l'image
-    image_bytes = image.read()
+    return result
 
-    # Encoder en base64
-    image_initial64 = base64.b64encode(image_bytes).decode('utf-8')
-
-    result = get_Result(image,description,x,y,image_initial64)
-
-    return jsonify({"result":result})
 
 
 if __name__=='__main__':

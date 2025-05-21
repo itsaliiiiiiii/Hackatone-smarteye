@@ -13,10 +13,7 @@ def register_user(fullName, phoneNumber, password, cin, city_name):
     if not city:
         return {'error': f'City "{city_name}" not found in region'}, 400
 
-    # Chercher la région par son nom
-    region = Region.query.filter_by(id=city.RegionId).first()
-    if not region:
-        return {'error': f'Region  not found'}, 400
+
 
     
     
@@ -31,7 +28,7 @@ def register_user(fullName, phoneNumber, password, cin, city_name):
         phoneNumber=phoneNumber,
         password=hashed_password,
         cin=cin,
-        RegionId=region.id,
+
         CityId=city.id
     )
     db.session.add(new_user)
