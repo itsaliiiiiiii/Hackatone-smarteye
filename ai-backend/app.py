@@ -11,8 +11,7 @@ import base64
 app = Flask(__name__)
 CORS(app, resources={r"/*": {"origins": ["http://localhost:3000", "http://localhost:5173", "http://localhost:3001"], "supports_credentials": True, "allow_headers": ["Content-Type", "Authorization", "Content-Length", "X-Requested-With"], "methods": ["GET", "POST", "PUT", "DELETE", "OPTIONS"]}})
 
-app = Flask(__name__)
-app.config['SQLALCHEMY_DATABASE_URI'] = 'mysql+pymysql://root:12345678@localhost/urban_issues'
+app.config['SQLALCHEMY_DATABASE_URI'] = 'mysql+pymysql://root:00000000@localhost/urban_issues'
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
 db.init_app(app)
